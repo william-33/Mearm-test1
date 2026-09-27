@@ -19,7 +19,7 @@ const int minclaw;
 //初始化
 void setup() {
   Serial.begin(9600);
-  base.attach();//初始化引脚
+  base.attach();              //初始化引脚
   delay(100);
   rArm.attach();
   delay(100);
@@ -65,7 +65,7 @@ void armdatecmd(char serialCmd)
     int servodate=Serial.parseInt();
     servocmd(serialCmd,servodate,DSD);//正确的话才执行下一步的改变变化
   }
-  else if
+  else 
   {
     switch(serialCmd)//查看当前的状态
     {
@@ -88,10 +88,10 @@ void reportcondition()
 {
   Serial.println(""); 
   Serial.println("####now the conditon:####");
-  Serial.print(" base==");Serial.println(base.read()); 
+  Serial.print("   base  ==");Serial.println(base.read()); 
   Serial.print(" rear Arm==");Serial.println(rArm.read());
-  Serial.print(" front Arm==");Serial.println(fArm.read()); 
-  Serial.print(" claw==");Serial.println(claw.read()); 
+  Serial.print("front Arm==");Serial.println(fArm.read()); 
+  Serial.print("  claw   ==");Serial.println(claw.read()); 
 }
 
 
@@ -110,6 +110,7 @@ void servocmd(char serialCmd ,int servodate,int DSD)
 
 //对的名称对象进行相应的动作
   switch(serialCmd)
+  {
   case 'b'://是base的话
   {
     if(servodate>=minbase&&servodate<=maxbase)//判断角度的合理
@@ -120,7 +121,7 @@ void servocmd(char serialCmd ,int servodate,int DSD)
     }
     else
     {
-      Seiral.println("###Warning: Servo Value out of the Limit!!###");
+      Serial.println("###Warning: Servo Value out of the Limit!!###");
       return;//回去主函数，结束。
     }
   }
@@ -134,7 +135,7 @@ void servocmd(char serialCmd ,int servodate,int DSD)
     }
     else
     {
-      Seiral.println("###Warning: Servo Value out of the Limit!!###");
+      Serial.println("###Warning: Servo Value out of the Limit!!###");
       return;//回去主函数，结束。
     }
   }
@@ -148,7 +149,7 @@ void servocmd(char serialCmd ,int servodate,int DSD)
     }
     else
     {
-      Seiral.println("###Warning: Servo Value out of the Limit!!###");
+      Serial.println("###Warning: Servo Value out of the Limit!!###");
       return;//回去主函数，结束。
     }
   }
@@ -162,11 +163,11 @@ void servocmd(char serialCmd ,int servodate,int DSD)
     }
     else
     {
-      Seiral.println("###Warning: Servo Value out of the Limit!!###");
+      Serial.println("###Warning: Servo Value out of the Limit!!###");
       return;//回去主函数，结束。
     }
   }
-}
+ }
 
 
 //在确定了目标正确，改变的目标角度也正确，进行下一步的操作。
