@@ -15,17 +15,29 @@ const int minfArm;
 const int minrArm;
 const int minclaw;
 
-void setup() {
+
+ void setup() {
   Serial.begin(9600);
-  base.attach(2);                                                  //记得要改引脚量
-  delay(200);
-  fArm.attach(4);
-  delay(200);
-  rArm.attach(6);
-  delay(200);
-  claw.attach(8);
-  delay(200);
-  Serial.println("please tell me your choice");
+  base.attach();
+  delay(100);
+  rArm.attach();
+  delay(100);
+  fArm.attach();
+  delay(100);
+  claw.attach();
+  delay(100);
+  
+  
+  base.write(90); //初始化
+  delay(10);
+  fArm.write(90);
+  delay(10);
+  rArm.write(90);
+  delay(10);
+  claw.write(90);
+  delay(10);
+  Serial.println("please tell me your choice  ");
+
 }
 
 void loop() {
