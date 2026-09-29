@@ -14,8 +14,8 @@
 #define BAUD_RATE         9600
 
 //定义脉宽最值，角度最值，周期
-#define MAX_PULSE_US   2500
-#define MIN_PULSE_US   500
+#define MAX_PULSE_US   2400
+#define MIN_PULSE_US   544
 #define MAX_ANGLE      180
 #define MIN_ANGLE      0
 #define FRAME_US       20000UL // PWM 周期 20ms（50Hz）
