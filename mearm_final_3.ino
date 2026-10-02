@@ -35,7 +35,7 @@ float farmangle=90;
 int curBase = 90, currarm = 90, curfarm = 90;
 
 //确定好各个臂的长度
-const float L1=;      //大臂       记得测量实际的长度
+const float L1=;      //大臂       记得测量实际的长度，90.0
 const float L2=;      //小臂
 const float H0=;      //底座
 
