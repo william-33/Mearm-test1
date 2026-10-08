@@ -236,10 +236,10 @@ void recordloop()
       }
     }
     //移动机器
-    curBase=curBase+truemove(JOY_1X_PIN);
-    currarm=currarm+truemove(JOY_1Y_PIN);
-    curfarm=curfarm+truemove(JOY_2X_PIN);
-    curgrip=curgrip+truemove(JOY_2Y_PIN);
+    curBase  = constrain(curBase  + truemove(JOY_1X_PIN), 0, 180);
+    currarm  = constrain(currarm  + truemove(JOY_1Y_PIN), 0, 180);
+    curfarm  = constrain(curfarm  + truemove(JOY_2X_PIN), 0, 180);
+    curgrip  = constrain(curgrip  + truemove(JOY_2Y_PIN), 0, 180);
     Base.write(curBase);
     rArm.write(currarm);
     fArm.write(curfarm);
@@ -270,6 +270,7 @@ void playrecord()
     Serial.println("还没有录制数据, 请先按按键2录制");
     return;
   }
+  else{
   Serial.print("=== 播放录制动作, 共 "); Serial.print(recLen);
   Serial.println(" 帧 ===");
   for(int i=0;i<recLen;i++)
@@ -285,7 +286,7 @@ void playrecord()
     delay(REC_INTERVAL);       // 与录制同节奏
   }
   Serial.println("=== 播放完毕 ===");
-}
+}}
 /* ==================== 初始化 ==================== */
 void setup() {
   Serial.begin(BAUD_RATE);
