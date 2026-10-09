@@ -78,9 +78,7 @@ void exchangeData(float x,float y,float z,float &baseangle,float &rarmangle,floa
   tmp4=constrain(tmp4,-1.0,1.0);
   tmp1=acos(tmp4)* 180.0 / PI;
   tmp2=atan2(H1,r)* 180.0 / PI;
-  if(H1<0)rarmangle=(tmp1)-(tmp2);
-  else if(H1>0)rarmangle=(tmp1)+(tmp2);
-  else if(H1==0)rarmangle=tmp1;
+  rarmangle=(tmp1)+(tmp2);
 }
 
 //转变具体的角度变为指令的角度
