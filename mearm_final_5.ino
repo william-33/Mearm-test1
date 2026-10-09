@@ -90,9 +90,7 @@ bool exchangeData(float x,float y,float z,float &baseangle,float &rarmangle,floa
   tmp4=constrain(tmp4,-1.0,1.0);
   tmp1=acos(tmp4)* 180.0 / PI;
   tmp2=atan2(H1,r)* 180.0 / PI;
-  if(H1<0)rarmangle=(tmp1)-(tmp2);
-  else if(H1>0)rarmangle=(tmp1)+(tmp2);
-  else if(H1==0)rarmangle=tmp1;
+  rarmangle=(tmp1)+(tmp2);
   return true;
 }
 
@@ -113,8 +111,8 @@ bool drawLine(float x0,float y0,float x,float y,float z0){
      if(!pauseLoop()) return false;
    }
   if (cmd3=='C') return false;
-   nowx=nowx+dx/n*i;
-   nowy=nowy+dy/n*i;
+   nowx=nowx+dx*i/n;
+   nowy=nowy+dy*i/n;
 
    float t1,t2,t3;
    if (!exchangeData(nowx,nowy,z0,t1,t2,t3)) return false; 
