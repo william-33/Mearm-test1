@@ -4,18 +4,23 @@
 #define LINE_STEP  1
 #define LINE_DELAY  40 
 
-#define GRIPPER_PIN   9    // 爪子舵机
-#define Base_PIN     6    // 关节1 (底座旋转)                              ###记得改引脚###
-#define rArm_PIN     5    // 关节2 (大臂)
-#define fArm_PIN     3    // 关节3 (小臂)
+#define GRIPPER_PIN   6    // 爪子舵机
+#define Base_PIN     9    // 关节1 (底座旋转)                              ###记得改引脚###
+#define rArm_PIN     8    // 关节2 (大臂)
+#define fArm_PIN     7    // 关节3 (小臂)
 #define PIN_PAUSE   4    // 暂停键
-#define PIN_RESUME  7    // 继续键
-#define PIN_CANCEL  8    // 取消键
+#define PIN_RESUME  12    // 继续键
+#define PIN_CANCEL  13    // 取消键
 
-// 爪子开 / 关 角度 (单位: 度, 0~180, 按舵机实际行程调整)
-#define GRIP_OPEN_ANGLE   90
-#define GRIP_CLOSE_ANGLE  30   //到时候测一下拿笔的角度
+// 爪子开 / 关 角度 
+#define GRIP_OPEN_ANGLE   146
+#define GRIP_CLOSE_ANGLE  56
 
+// —— 2 个摇杆的 4 个模拟轴 ——
+#define JOY_1X_PIN    A0    // 摇杆1 X -> 底座 Base
+#define JOY_1Y_PIN    A1    // 摇杆1 Y -> 大臂 rArm
+#define JOY_2X_PIN    A2    // 摇杆2 X -> 小臂 fArm
+#define JOY_2Y_PIN    A3    // 摇杆2 Y -> 夹爪 Gripper
 // 串口波特率
 #define BAUD_RATE         9600
 
@@ -47,7 +52,7 @@ Servo fArm;
 Servo Gripper;
 
 float baseangle,rarmangle,farmangle;
-int curBase = 90, currarm = 90, curfarm = 90;
+int curBase = 90, currarm = 20, curfarm = 90;
 
 float curX = 150, curY = 0;//在指定平面的坐标，要改                ####记得修改####
 
@@ -56,7 +61,7 @@ const float L2 = 120.0;
 const float H0 = 0.0;
 
 const float Base_OFF = 90, Base_DIR = 1;
-const float rArm_OFF  = 90, rArm_DIR  = 1;
+const float rArm_OFF  = 20, rArm_DIR  = 1;
 const float fArm_OFF  = 90, fArm_DIR  = 1;
 
 
@@ -85,12 +90,12 @@ bool exchangeData(float x,float y,float z,float &baseangle,float &rarmangle,floa
   baseangle=atan2(y,x)* 180.0 / PI;
   float tmp3=(L1*L1+L2*L2-L3*L3)/(2*L1*L2);
   tmp3=constrain(tmp3,-1.0,1.0);
-  farmangle=acos(tmp3)* 180.0 / PI;
   float tmp4=(L3*L3+L1*L1-L2*L2)/(2*L3*L1);
   tmp4=constrain(tmp4,-1.0,1.0);
   tmp1=acos(tmp4)* 180.0 / PI;
   tmp2=atan2(H1,r)* 180.0 / PI;
   rarmangle=(tmp1)+(tmp2);
+  farmangle=(acos(tmp3)* 180.0 / PI)+rarmangle;
   return true;
 }
 
@@ -127,8 +132,8 @@ bool drawLine(float x0,float y0,float x,float y,float z0){
 
 //转变具体的角度变为指令的角度
 int baseToServo(float t1)     { return constrain((int)(Base_OFF  + Base_DIR  * t1), 0, 180); }
-int rarmToServo(float t2)     { return constrain((int)(rArm_OFF  + rArm_DIR  * t2), 0, 180); }
-int farmToServo(float t3)     { return constrain((int)(fArm_OFF  + fArm_DIR  * t3), 0, 180); }
+int rarmToServo(float t2)     { return constrain((int)(rArm_OFF  + rArm_DIR  * t2), 20, 115); }
+int farmToServo(float t3)     { return constrain((int)(fArm_OFF  + fArm_DIR  * t3), 50, 130); }
 
 //用于画直线快速移动
 void moveToAnglesFast(int x,int y,int z){
@@ -178,7 +183,7 @@ void gripMoveTo(int target) {
       cur -= STEP_ANGLE;              // 往小走一小步
       if (cur < target) cur = target;
     }
-    Gripper.write(constrain(cur, 0, 180));
+    Gripper.write(constrain(cur, 56, 146));
     delay(STEP_DELAY);
   }
 }
@@ -282,7 +287,7 @@ void setup() {
 
   Base.write(90);
   delay(10);
-  rArm.write(90);
+  rArm.write(20);
   delay(10);
   fArm.write(90);
   delay(10);
@@ -291,7 +296,7 @@ void setup() {
   Serial.println("==========================================");
   Serial.println(" Robot arm drawing ready. (v1: task 1-3)");
   Serial.println(" Commands: L=line  N/Z/V=letter  S=triangle");
-  Serial.println(" Keys: PAUSE(4) RESUME(7) CANCEL(8)");
+  Serial.println(" Keys: PAUSE(4) RESUME(12) CANCEL(13)");
   Serial.println("==========================================");
   delay(10);
 

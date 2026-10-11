@@ -2,14 +2,14 @@
 #include <math.h>
 /* ==================== 配置区 (按实际硬件修改) ==================== */
 
-#define GRIPPER_PIN   9    // 爪子舵机
-#define Base_PIN     6    // 关节1 (底座旋转)                              记得要改引脚
-#define rArm_PIN     5    // 关节2 (大臂)
-#define fArm_PIN     3    // 关节3 (小臂)
+#define GRIPPER_PIN   6    // 爪子舵机
+#define Base_PIN     9    // 关节1 (底座旋转)                              记得要改引脚
+#define rArm_PIN     8    // 关节2 (大臂)
+#define fArm_PIN     7    // 关节3 (小臂)
 
-// 爪子开 / 关 角度 (单位: 度, 0~180, 按舵机实际行程调整)
-#define GRIP_OPEN_ANGLE   90
-#define GRIP_CLOSE_ANGLE  30
+// 爪子开 / 关 角度 
+#define GRIP_OPEN_ANGLE   146
+#define GRIP_CLOSE_ANGLE  56
 
 // 串口波特率
 #define BAUD_RATE         9600
@@ -31,9 +31,9 @@
 #define JOY_2Y_PIN    A3    // 摇杆2 Y -> 夹爪 Gripper
 
 // —— 摇杆参数 ——
-#define JOY_CENTER    512   
-#define JOY_DEAD      30   
-#define JOY_SENSE     32    // 灵敏度：偏移 / 32 = 每圈转几度，数值越小越快,到时候自己挑
+#define JOY_CENTER    513   
+#define JOY_DEAD      50   
+#define JOY_SENSE     256    // 灵敏度：偏移 / 32 = 每圈转几度，数值越小越快,到时候自己挑
 
 /* ==================== 全局变量 ==================== */
 
@@ -41,15 +41,15 @@
 int gripperAngle = GRIP_OPEN_ANGLE;
 
 //确定各各舵机的最大值最小值（防止机器臂超出实际的移动角度）
-const int maxbase;            //先通过另一个程序确定再填写进入                               记得和机械的同学沟通一下
-const int maxfArm;
-const int maxrArm;
-const int maxclaw;
+const int maxbase = 180;      // 底座 上限
+const int maxfArm = 130;      // 小臂 上限
+const int maxrArm = 115;      // 大臂 上限
+const int maxclaw = 146;      // 爪子上限
 
-const int minbase;
-const int minfArm;
-const int minrArm;
-const int minclaw;
+const int minbase = 0;        // 底座 下限
+const int minfArm = 50;       // 小臂 下限
+const int minrArm = 20;       // 大臂 下限
+const int minclaw = 56;       // 爪子下限
 
 Servo Base;
 Servo rArm;
@@ -57,10 +57,9 @@ Servo fArm;
 Servo Gripper;
 
 int toPos = 90;
-int fromPos = 90;
 
 int curBase = 90;
-int currArm = 90;
+int currArm = 20;
 int curfArm = 90;
 
 int speedIndex = 2;
@@ -146,12 +145,15 @@ void ackone(Servo &servo)
 }
 
 //是否移动，并赋值
-int joyDelta(int pin)
+float joyDelta(int pin)
 {
-  int off=analogRead(pin)-JOY_CENTER;
+  float off=analogRead(pin)-JOY_CENTER;
   if(abs(off)<JOY_DEAD) return 0;
-  int angle=abs(off)/JOY_SENSE;
-  return (off > 0) ? angle : -angle;
+  float angle=off/JOY_SENSE;
+  Serial.print(off);
+  Serial.print(",");
+  Serial.println(angle);
+  return angle;
 }
 
 //是否在进行移动，用bool来判断是否进行下一个的串口通信
@@ -197,7 +199,7 @@ void setup() {
 
   Base.write(90);
   delay(10);
-  rArm.write(90);
+  rArm.write(20);
   delay(10);
   fArm.write(90);
   delay(10);
@@ -217,7 +219,8 @@ void setup() {
 
 void loop() {
   // 摇杆优先：本圈摇杆有动作
-  if (joyMove()) return;
+  if (joyMove()&&Serial.available()==0) return;
+  delay(100);
   
   if (Serial.available() > 0) {
     char check=Serial.peek();
@@ -242,6 +245,7 @@ void loop() {
       Base.write(x);
       rArm.write(y);
       fArm.write(z);
+      curBase=x; currArm=y; curfArm=z;    // ★ 账本同步
 
       Serial.println("=== command OK ===");
       Serial.print("x = "); Serial.print(x);
@@ -265,31 +269,28 @@ void loop() {
       char cmd = Serial.read();
       switch (cmd) {
       case 'b':   // 基底移动
-        fromPos=Base.read();
         delay(10);
         toPos = Serial.parseInt();
         if(toPos<=maxbase&&toPos>=minbase)
-        {moveServo(Base,fromPos,toPos);
+        {moveServo(Base,curBase,toPos);
         ack(cmd);}
         else{Serial.println("out of the Limit!!");}
         break;
       
       case 'r':   // 后臂移动
-        fromPos=rArm.read();
         delay(10);
         toPos = Serial.parseInt();
         if(toPos<=maxrArm&&toPos>=minrArm)
-        {moveServo(rArm,fromPos,toPos);
+        {moveServo(rArm,currArm,toPos);
         ack(cmd);}
         else{Serial.println("out of the Limit!!");}
         break;
       
       case 'f':  // 前臂移动
-        fromPos=fArm.read();
         delay(10);
         toPos = Serial.parseInt();
         if(toPos<=maxfArm&&toPos>=minfArm)
-        {moveServo(fArm,fromPos,toPos);
+        {moveServo(fArm,curfArm,toPos);
         ack(cmd);}
         else{Serial.println("out of the Limit!!");}
         break;
@@ -320,14 +321,10 @@ void loop() {
 
       case 'i':
       //初始化机器
-        Base.write(90);
-        delay(speedDelay[speedIndex]);
-        rArm.write(90);
-        delay(speedDelay[speedIndex]);
-        fArm.write(90);
-        delay(speedDelay[speedIndex]);
-        Gripper.write(90);
-        delay(20);
+        moveServo(Gripper, gripperAngle, GRIP_OPEN_ANGLE);
+        moveServo(fArm,curfArm,90);
+        moveServo(rArm,currArm,20);
+        moveServo(Base,curBase,90);
       //显示状态
         Serial.print("the base=");
         ackone(Base);

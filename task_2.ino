@@ -1,14 +1,14 @@
 #include <Servo.h>
 #include <math.h>
 /* ==================== 配置区 (按实际硬件修改) ==================== */
-#define GRIPPER_PIN   9    // 爪子舵机
-#define Base_PIN     6    // 关节1 (底座旋转)                              记得要改引脚
-#define rArm_PIN     5    // 关节2 (大臂)
-#define fArm_PIN     3    // 关节3 (小臂)
+#define GRIPPER_PIN   6    // 爪子舵机
+#define Base_PIN     9    // 关节1 (底座旋转)                              记得要改引脚
+#define rArm_PIN     8    // 关节2 (大臂)
+#define fArm_PIN     7    // 关节3 (小臂)
 
 // 爪子开 / 关 角度 (单位: 度, 0~180, 按舵机实际行程调整)
-#define GRIP_OPEN_ANGLE   90
-#define GRIP_CLOSE_ANGLE  30
+#define GRIP_OPEN_ANGLE   146
+#define GRIP_CLOSE_ANGLE  56
 
 // 串口波特率
 #define BAUD_RATE         9600
@@ -23,16 +23,16 @@
 
 //确定各个部分的初始角度值
 const float Base_OFF=90,Base_DIR=1;
-const float rArm_OFF=90,rArm_DIR=1;
+const float rArm_OFF=20,rArm_DIR=1;
 const float fArm_OFF=90,fArm_DIR=1;
 
 //各个部分的角度
 float baseangle=90;
-float rarmangle=90;
+float rarmangle=20;
 float farmangle=90;
 
 // 记录三个关节舵机"当前"的角度（用于平滑步进时知道从哪出发）
-int curBase = 90, currarm = 90, curfarm = 90;
+int curBase = 90, currarm = 20, curfarm = 90;
 
 //确定好各个臂的长度
 const float L1=;      //大臂       记得测量实际的长度，90.0
@@ -73,18 +73,18 @@ void exchangeData(float x,float y,float z,float &baseangle,float &rarmangle,floa
   baseangle=atan2(y,x)* 180.0 / PI;
   float tmp3=(L1*L1+L2*L2-L3*L3)/(2*L1*L2);
   tmp3=constrain(tmp3,-1.0,1.0);
-  farmangle=acos(tmp3)* 180.0 / PI;
   float tmp4=(L3*L3+L1*L1-L2*L2)/(2*L3*L1);
   tmp4=constrain(tmp4,-1.0,1.0);
   tmp1=acos(tmp4)* 180.0 / PI;
   tmp2=atan2(H1,r)* 180.0 / PI;
   rarmangle=(tmp1)+(tmp2);
+  farmangle=(acos(tmp3)* 180.0 / PI)+rarmangle;
 }
 
 //转变具体的角度变为指令的角度
-int baseToServo(float baseangle)     { return Base_OFF  + Base_DIR *baseangle ; }
-int rarmToServo(float rarmangle)     { return rArm_OFF  + rArm_DIR * rarmangle; }
-int farmToServo(float farmangle)     { return fArm_OFF  + fArm_DIR * farmangle; }
+int baseToServo(float baseangle)     { return constrain((int)(Base_OFF  + Base_DIR *baseangle ),   0, 180); }
+int rarmToServo(float rarmangle)     { return constrain((int)(rArm_OFF  + rArm_DIR *rarmangle),  20, 115); }
+int farmToServo(float farmangle)     { return constrain((int)(fArm_OFF  + fArm_DIR *farmangle),  50, 130); }
 
 //阻塞式平滑移动（三轴同步）
 void moveToAngles(float baseangle, float rarmangle, float farmangle) {
@@ -124,7 +124,7 @@ void gripMoveTo(int target) {
       cur -= STEP_ANGLE;              // 往小走一小步
       if (cur < target) cur = target;
     }
-    Gripper.write(constrain(cur, 0, 180));
+    Gripper.write(constrain(cur, 56, 146));
     delay(STEP_DELAY);
   }
 }
@@ -184,7 +184,7 @@ void setup() {
 
   Base.write(90);
   delay(10);
-  rArm.write(90);
+  rArm.write(20);
   delay(10);
   fArm.write(90);
   delay(10);
