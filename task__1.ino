@@ -8,8 +8,8 @@
 #define fArm_PIN     7    // 关节3 (小臂)
 
 // 爪子开 / 关 角度 
-#define GRIP_OPEN_ANGLE   146
-#define GRIP_CLOSE_ANGLE  56
+#define GRIP_OPEN_ANGLE   168
+#define GRIP_CLOSE_ANGLE  81
 
 // 串口波特率
 #define BAUD_RATE         9600
@@ -42,14 +42,14 @@ int gripperAngle = GRIP_OPEN_ANGLE;
 
 //确定各各舵机的最大值最小值（防止机器臂超出实际的移动角度）
 const int maxbase = 180;      // 底座 上限
-const int maxfArm = 130;      // 小臂 上限
+const int maxfArm = 145;      // 小臂 上限
 const int maxrArm = 115;      // 大臂 上限
-const int maxclaw = 146;      // 爪子上限
+const int maxclaw = 168;      // 爪子上限
 
 const int minbase = 0;        // 底座 下限
-const int minfArm = 50;       // 小臂 下限
+const int minfArm = 90;       // 小臂 下限
 const int minrArm = 20;       // 大臂 下限
-const int minclaw = 56;       // 爪子下限
+const int minclaw = 81;       // 爪子下限
 
 Servo Base;
 Servo rArm;

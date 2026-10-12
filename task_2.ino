@@ -7,8 +7,8 @@
 #define fArm_PIN     7    // 关节3 (小臂)
 
 // 爪子开 / 关 角度 (单位: 度, 0~180, 按舵机实际行程调整)
-#define GRIP_OPEN_ANGLE   146
-#define GRIP_CLOSE_ANGLE  56
+#define GRIP_OPEN_ANGLE   168
+#define GRIP_CLOSE_ANGLE  81
 
 // 串口波特率
 #define BAUD_RATE         9600
@@ -84,7 +84,7 @@ void exchangeData(float x,float y,float z,float &baseangle,float &rarmangle,floa
 //转变具体的角度变为指令的角度
 int baseToServo(float baseangle)     { return constrain((int)(Base_OFF  + Base_DIR *baseangle ),   0, 180); }
 int rarmToServo(float rarmangle)     { return constrain((int)(rArm_OFF  + rArm_DIR *rarmangle),  20, 115); }
-int farmToServo(float farmangle)     { return constrain((int)(fArm_OFF  + fArm_DIR *farmangle),  50, 130); }
+int farmToServo(float farmangle)     { return constrain((int)(fArm_OFF  + fArm_DIR *farmangle),  90, 145); }
 
 //阻塞式平滑移动（三轴同步）
 void moveToAngles(float baseangle, float rarmangle, float farmangle) {
@@ -124,7 +124,7 @@ void gripMoveTo(int target) {
       cur -= STEP_ANGLE;              // 往小走一小步
       if (cur < target) cur = target;
     }
-    Gripper.write(constrain(cur, 56, 146));
+    Gripper.write(constrain(cur, 81, 168));
     delay(STEP_DELAY);
   }
 }

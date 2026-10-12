@@ -26,8 +26,8 @@ const float L1 = ;   //记得填写
 const float L2 = ;
 const float H0 = ;
 
-#define GRIP_OPEN_ANGLE   146
-#define GRIP_CLOSE_ANGLE  56
+#define GRIP_OPEN_ANGLE   168
+#define GRIP_CLOSE_ANGLE  81
 
 #define STEP_ANGLE   2
 #define STEP_DELAY   15
@@ -38,7 +38,7 @@ const float H0 = ;
 /* ==================== 全局变量 ==================== */
 
 const float Base_OFF=90,Base_DIR=1;
-const float rArm_OFF=20,rArm_DIR=1;
+const float rArm_OFF=90,rArm_DIR=1;
 const float fArm_OFF=90,fArm_DIR=1;
 
 Servo Base;
@@ -106,7 +106,7 @@ void exchangeData(float x,float y,float z,float &baseangle,float &rarmangle,floa
 //转变具体的角度变为指令的角度
 int baseToServo(float baseangle)     { return constrain((int)(Base_OFF  + Base_DIR *baseangle ),   0, 180); }
 int rarmToServo(float rarmangle)     { return constrain((int)(rArm_OFF  + rArm_DIR *rarmangle),  20, 115); }
-int farmToServo(float farmangle)     { return constrain((int)(fArm_OFF  + fArm_DIR *farmangle),  50, 130); }
+int farmToServo(float farmangle)     { return constrain((int)(fArm_OFF  + fArm_DIR *farmangle),  90, 145); }
 
 //阻塞式平滑移动（三轴同步）
 void moveToAngles(float baseangle, float rarmangle, float farmangle) {
@@ -145,7 +145,7 @@ void gripMoveTo(int target) {
       curgrip -= STEP_ANGLE;              // 往小走一小步
       if (curgrip< target) curgrip = target;
     }
-    Gripper.write((int)round(constrain(curgrip, 56, 146)));
+    Gripper.write((int)round(constrain(curgrip, 81, 168)));
     delay(STEP_DELAY);
   }
 }
@@ -200,7 +200,8 @@ float truemove(int pin)
 {
   float off=analogRead(pin)-JOY_CENTER;
   if(abs(off)<JOY_DEAD) return 0;
-  return off / 256.0;
+  float angle=off/256;
+  return angle;
 }
 
 //改变recording 的值，启动录制(第一层函数)
@@ -234,8 +235,8 @@ void recordloop()
     //移动机器
     curBase  = constrain(curBase  + truemove(JOY_1X_PIN), 0, 180);
     currarm  = constrain(currarm  + truemove(JOY_1Y_PIN), 20, 115);
-    curfarm  = constrain(curfarm  + truemove(JOY_2X_PIN), 50, 130);
-    curgrip  = constrain(curgrip  + truemove(JOY_2Y_PIN), 56, 146);
+    curfarm  = constrain(curfarm  + truemove(JOY_2X_PIN), 90, 145);
+    curgrip  = constrain(curgrip  + truemove(JOY_2Y_PIN), 81, 168);
     Base.write((int)round(curBase));
     rArm.write((int)round(currarm));
     fArm.write((int)round(curfarm));
