@@ -7,37 +7,37 @@
 #define fArm_PIN     7    // 关节3 (小臂)
 
 // 爪子开 / 关 角度 (单位: 度, 0~180, 按舵机实际行程调整)
-#define GRIP_OPEN_ANGLE   168
-#define GRIP_CLOSE_ANGLE  81
+#define GRIP_OPEN_ANGLE   81
+#define GRIP_CLOSE_ANGLE  178
 
 // 串口波特率
 #define BAUD_RATE         9600
 
 //控制机械臂的平滑移动
 #define STEP_ANGLE   2     // 每步最多转 2 度
-#define STEP_DELAY   15  
+#define STEP_DELAY   100  
 
-#define HOVER_DZ 50.0   // 悬停高度：在目标点正上方 50mm 处移动，防止横扫撞倒物体
+#define HOVER_DZ 10.0   // 悬停高度：在目标点正上方 50mm 处移动，防止横扫撞倒物体
 
 /* ==================== 全局变量 ==================== */
 
 //确定各个部分的初始角度值
 const float Base_OFF=90,Base_DIR=1;
-const float rArm_OFF=20,rArm_DIR=1;
-const float fArm_OFF=90,fArm_DIR=1;
+const float rArm_OFF=145,rArm_DIR=-1;
+const float fArm_OFF=-50,fArm_DIR=1;
 
 //各个部分的角度
 float baseangle=90;
-float rarmangle=20;
+float rarmangle=45;
 float farmangle=90;
 
 // 记录三个关节舵机"当前"的角度（用于平滑步进时知道从哪出发）
-int curBase = 90, currarm = 20, curfarm = 90;
+int curBase = 90, currarm = 45, curfarm = 90;
 
 //确定好各个臂的长度
-const float L1=;      //大臂       记得测量实际的长度，90.0
-const float L2=;      //小臂
-const float H0=;      //底座
+const float L1=8;      //大臂       记得测量实际的长度，90.0
+const float L2=8;      //小臂
+const float H0=6;      //底座
 
 Servo Base;
 Servo rArm;
@@ -51,14 +51,14 @@ struct Point {
   float z;
 };
 
-Point pickA  = {100, -60, 30}; // 物体A 在哪里
-Point placeA = { 60,  80, 60}; // 物体A 要放到哪里
-Point pickB  = {150,   0, 30}; //同理 
-Point placeB = { 90, -90, 60};
-Point pickC  = {100,  60, 30};
-Point placeC = { 60, -80, 60};
+Point pickA  = {1,4.2,2}; // 物体A 在哪里
+Point placeA = {7.8, -10.7,2}; // 物体A 要放到哪里
+// Point pickB  = {150,   0, 30}; //同理 
+// Point placeB = { 90, -90, 60};
+// Point pickC  = {100,  60, 30};
+// Point placeC = { 60, -80, 60};
 
-Point HOME   = {150, 0, 100};    // 任务结束后的"休息位"
+Point HOME   = {10, 0, 6};    // 任务结束后的"休息位"
 
 /* ==================== 工具函数 ==================== */
 
@@ -184,7 +184,7 @@ void setup() {
 
   Base.write(90);
   delay(10);
-  rArm.write(20);
+  rArm.write(45);
   delay(10);
   fArm.write(90);
   delay(10);
@@ -216,14 +216,14 @@ void loop()
         pickAndPlace(pickA, placeA);
         Serial.println("DONE: A");
         break;
-      case 'B': case 'b':
-        pickAndPlace(pickB, placeB);
-        Serial.println("DONE: B");
-        break;
-      case 'C': case 'c':
-        pickAndPlace(pickC, placeC);
-        Serial.println("DONE: C");
-        break;
+      // case 'B': case 'b':
+      //   pickAndPlace(pickB, placeB);
+      //   Serial.println("DONE: B");
+      //   break;
+      // case 'C': case 'c':
+      //   pickAndPlace(pickC, placeC);
+      //   Serial.println("DONE: C");
+      //   break;
       default:
         // 收到不认识的字符，打印帮助信息
         Serial.println("Unknown command. Send A / B / C.");

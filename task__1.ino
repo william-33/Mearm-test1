@@ -8,8 +8,8 @@
 #define fArm_PIN     7    // 关节3 (小臂)
 
 // 爪子开 / 关 角度 
-#define GRIP_OPEN_ANGLE   168
-#define GRIP_CLOSE_ANGLE  81
+#define GRIP_OPEN_ANGLE   81
+#define GRIP_CLOSE_ANGLE  178
 
 // 串口波特率
 #define BAUD_RATE         9600
@@ -44,7 +44,7 @@ int gripperAngle = GRIP_OPEN_ANGLE;
 const int maxbase = 180;      // 底座 上限
 const int maxfArm = 145;      // 小臂 上限
 const int maxrArm = 115;      // 大臂 上限
-const int maxclaw = 168;      // 爪子上限
+const int maxclaw = 178;      // 爪子上限
 
 const int minbase = 0;        // 底座 下限
 const int minfArm = 90;       // 小臂 下限
@@ -59,7 +59,7 @@ Servo Gripper;
 int toPos = 90;
 
 int curBase = 90;
-int currArm = 20;
+int currArm = 45;
 int curfArm = 90;
 
 int speedIndex = 2;
@@ -199,7 +199,7 @@ void setup() {
 
   Base.write(90);
   delay(10);
-  rArm.write(20);
+  rArm.write(45);
   delay(10);
   fArm.write(90);
   delay(10);
@@ -323,7 +323,7 @@ void loop() {
       //初始化机器
         moveServo(Gripper, gripperAngle, GRIP_OPEN_ANGLE);
         moveServo(fArm,curfArm,90);
-        moveServo(rArm,currArm,20);
+        moveServo(rArm,currArm,45);
         moveServo(Base,curBase,90);
       //显示状态
         Serial.print("the base=");
