@@ -27,8 +27,8 @@
 // —— 2 个摇杆的 4 个模拟轴 ——
 #define JOY_1X_PIN    A0    // 摇杆1 X -> 底座 Base
 #define JOY_1Y_PIN    A1    // 摇杆1 Y -> 大臂 rArm
-#define JOY_2X_PIN    A2    // 摇杆2 X -> 小臂 fArm
-#define JOY_2Y_PIN    A3    // 摇杆2 Y -> 夹爪 Gripper
+#define JOY_2X_PIN    A2   // 摇杆2 X -> 爪子 Gripper
+#define JOY_2Y_PIN    A3   // 摇杆2 Y -> 小臂 fArm
 
 // —— 摇杆参数 ——
 #define JOY_CENTER    513   
@@ -43,7 +43,7 @@ int gripperAngle = GRIP_OPEN_ANGLE;
 //确定各各舵机的最大值最小值（防止机器臂超出实际的移动角度）
 const int maxbase = 180;      // 底座 上限
 const int maxfArm = 145;      // 小臂 上限
-const int maxrArm = 115;      // 大臂 上限
+const int maxrArm = 120;      // 大臂 上限
 const int maxclaw = 178;      // 爪子上限
 
 const int minbase = 0;        // 底座 下限
@@ -153,15 +153,15 @@ float joyDelta(int pin)
   Serial.print(off);
   Serial.print(",");
   Serial.println(angle);
-  return angle;
+  return (-angle);
 }
 
 //是否在进行移动，用bool来判断是否进行下一个的串口通信
 bool joyMove(){
   int dB = joyDelta(JOY_1X_PIN);
   int dR = joyDelta(JOY_1Y_PIN);
-  int dF = joyDelta(JOY_2X_PIN);
-  int dG = joyDelta(JOY_2Y_PIN);
+  int dF = joyDelta(JOY_2Y_PIN);
+  int dG = joyDelta(JOY_2X_PIN);
 
   if (dB == 0 && dR == 0 && dF == 0 && dG == 0) return false; 
   curBase += dB;

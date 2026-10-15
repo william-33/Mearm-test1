@@ -16,27 +16,27 @@
 #define PIN_CANCEL  13    // 取消键
 
 // 爪子开 / 关 角度 
-#define GRIP_OPEN_ANGLE   168
-#define GRIP_CLOSE_ANGLE  81
+#define GRIP_OPEN_ANGLE   81
+#define GRIP_CLOSE_ANGLE  178
 
 // —— 2 个摇杆的 4 个模拟轴 ——
 #define JOY_1X_PIN    A0    // 摇杆1 X -> 底座 Base
 #define JOY_1Y_PIN    A1    // 摇杆1 Y -> 大臂 rArm
-#define JOY_2X_PIN    A2    // 摇杆2 X -> 小臂 fArm
-#define JOY_2Y_PIN    A3    // 摇杆2 Y -> 夹爪 Gripper
+#define JOY_2X_PIN    A2    // 摇杆2 X -> 爪子 Gripper
+#define JOY_2Y_PIN    A3    // 摇杆2 Y -> 小臂 fArm
 // 串口波特率
 #define BAUD_RATE         9600
 
 #define JOY_CENTER  513  // 摇杆中位理论值
 #define JOY_DEAD    50   // 死区：偏移小于它算"没动"
 
-#define Z_PEN_DOWN   //待定 纸面高度
-#define Z_TRAVEL     //待定 空程移动高度 
-#define Z_TEACH      //待定 示教高度 起始位
+#define Z_PEN_DOWN   2//待定 纸面高度
+#define Z_TRAVEL     6//待定 空程移动高度 
+#define Z_TEACH      5//待定 示教高度 起始位
 
 //控制机械臂的平滑移动
 #define STEP_ANGLE   2     // 每步最多转 2 度
-#define STEP_DELAY   15
+#define STEP_DELAY   20
 
 #define X_MIN 90.0
 #define X_MAX 180.0
@@ -54,17 +54,17 @@ struct Point{
   float z;
 };
 
-const float L_x[2] = {100, 160};
-const float L_y[2] = {0, 0};                   // ####记得填写修改####
-const float V_x[3] = {100, 130, 160};
-const float V_y[3] = {-30, 30, -30};
+const float L_x[2] = {0, 0};
+const float L_y[2] = {,11};                   // ####记得填写修改####
+const float V_x[3] = {0,4,8};
+const float V_y[3] = {8,4,8};
 
-const float PEN_X = 150.0, PEN_Y = 0.0;   // 取笔点的平面坐标（占位值，实测后改）
-const float PEN_Z = 40.0;                 // 取笔时爪子下降到的高度（爪口对准笔身）
-const float PEN_HOVER = ;                 // 取笔前的悬停高度
+const float PEN_X = 1, PEN_Y = 4.2;   // 取笔点的平面坐标（占位值，实测后改）
+const float PEN_Z = 2;                 // 取笔时爪子下降到的高度（爪口对准笔身）
+const float PEN_HOVER = 5;                 // 取笔前的悬停高度
 
 Point pensite ={PEN_X, PEN_Y, PEN_Z};
-Point HOME = {150, 0, 100};   // 待机位                 ####记得修改####
+Point HOME = {0,10, 8};   // 待机位                 ####记得修改####
 
 Servo Base;
 Servo rArm;
@@ -72,17 +72,17 @@ Servo fArm;
 Servo Gripper;
 
 float baseangle,rarmangle,farmangle;
-int curBase = 90, currarm = 20, curfarm = 90;
+int curBase = 90, currarm = 45, curfarm = 90;
 
 float curX = 150, curY = 0;//在指定平面的坐标，要改                ####记得修改####
 
-const float L1 = 80.0; //                             ####记得修改####
-const float L2 = 120.0;
-const float H0 = 0.0;
+const float L1 = 8; //                             ####记得修改####
+const float L2 = 8;
+const float H0 = 6;
 
-const float Base_OFF = 90, Base_DIR = 1;
-const float rArm_OFF  = 20, rArm_DIR  = 1;
-const float fArm_OFF  = 90, fArm_DIR  = 1;
+const float Base_OFF = 0, Base_DIR = 1;
+const float rArm_OFF  = 135, rArm_DIR  = -1;
+const float fArm_OFF  = -50, fArm_DIR  = 1;
 
 // 示教点（最多 5 个）
 float teachX[5];
@@ -118,20 +118,20 @@ bool exchangeData(float x,float y,float z,float &baseangle,float &rarmangle,floa
 {
   float tmp1;
   float tmp2;
-  float r=sqrt(x*x+y*y);
+  float r=sqrtf(x*x+y*y);
   float H1=z-H0;
-  float L3=sqrt(H1*H1+r*r);
+  float L3=sqrtf(H1*H1+r*r);
   if (L3 > L1 + L2)       return false;   
   if (L3 < fabs(L1 - L2)) return false; 
-  baseangle=atan2(y,x)* 180.0 / PI;
+  baseangle=atan2f(y,x)* 180.0 / PI;
   float tmp3=(L1*L1+L2*L2-L3*L3)/(2*L1*L2);
   tmp3=constrain(tmp3,-1.0,1.0);
   float tmp4=(L3*L3+L1*L1-L2*L2)/(2*L3*L1);
   tmp4=constrain(tmp4,-1.0,1.0);
-  tmp1=acos(tmp4)* 180.0 / PI;
-  tmp2=atan2(H1,r)* 180.0 / PI;
+  tmp1=acosf(tmp4)* 180.0 / PI;
+  tmp2=atan2f(H1,r)* 180.0 / PI;
   rarmangle=(tmp1)+(tmp2);
-  farmangle=(acos(tmp3)* 180.0 / PI)+rarmangle;
+  farmangle=(acosf(tmp3)* 180.0 / PI)+rarmangle;
   return true;
 }
 
@@ -152,9 +152,9 @@ bool drawLine(float x0,float y0,float x,float y,float z0){
      if(!pauseLoop()) return false;
    }
   if (cmd3=='C') return false;
-   nowx=nowx+dx*i/n;
-   nowy=nowy+dy*i/n;
-
+   nowx=x0+dx*i/n;
+   nowy=y0+dy*i/n;
+   delay(15);
    float t1,t2,t3;
    if (!exchangeData(nowx,nowy,z0,t1,t2,t3)) return false; 
    moveToAnglesFast(baseToServo(t1),rarmToServo(t2),farmToServo(t3));
@@ -168,7 +168,7 @@ bool drawLine(float x0,float y0,float x,float y,float z0){
 
 //转变具体的角度变为指令的角度
 int baseToServo(float t1)     { return constrain((int)(Base_OFF  + Base_DIR  * t1), 0, 180); }
-int rarmToServo(float t2)     { return constrain((int)(rArm_OFF  + rArm_DIR  * t2), 20, 115); }
+int rarmToServo(float t2)     { return constrain((int)(rArm_OFF  + rArm_DIR  * t2), 20, 120); }
 int farmToServo(float t3)     { return constrain((int)(fArm_OFF  + fArm_DIR  * t3), 90, 145); }
 
 //用于画直线快速移动
@@ -219,7 +219,7 @@ void gripMoveTo(int target) {
       cur -= STEP_ANGLE;              // 往小走一小步
       if (cur < target) cur = target;
     }
-    Gripper.write(constrain(cur, 81, 168));
+    Gripper.write(constrain(cur, 81, 178));
     delay(STEP_DELAY);
   }
 }
@@ -275,6 +275,8 @@ void getpen()
   gripOpen();
   moveToPoint(pensite.x,pensite.y,PEN_HOVER);
   moveToPoint(pensite.x,pensite.y,pensite.z);
+  Serial.println("[拿笔] 爪子已到位, 请调整笔位, 2 秒后自动夹紧");
+  delay(2000);
   Serial.println("[拿笔] 夹住铅笔");
   gripClose();
   penheld=true;
@@ -312,7 +314,7 @@ bool pauseLoop()
 void forwardKinematics(float sBase,float sRarm,float sFarm,float &x,float &y,float &z)
 {
   float s1=constrain(sBase,0,180);
-  float s2=constrain(sRarm,20,115);
+  float s2=constrain(sRarm,20,120);
   float s3=constrain(sFarm,90,145);
 
   float t1 = (s1 - Base_OFF) / Base_DIR;
@@ -322,10 +324,12 @@ void forwardKinematics(float sBase,float sRarm,float sFarm,float &x,float &y,flo
   float r1 = t1 * PI / 180.0;
   float r2 = t2 * PI / 180.0;
   float r3 = t3 * PI / 180.0;
-
-
-  float pz = L1 * sin(r2) + L2 * sin(r2 + r3);
-  //等待确认
+  float r4 = r3-r2;
+  float pr = L1*cos(r2)+L2*cos(PI-r2-r4);
+  float m1 = L1 * sin(r2);
+  float m2 = L2 * sin(PI-r2-r4);
+  float pz = (L1>L2)?(L1-L2):(L2-L1);
+  
 
   x = pr * cos(r1);
   y = pr * sin(r1);
@@ -336,7 +340,7 @@ void forwardKinematics(float sBase,float sRarm,float sFarm,float &x,float &y,flo
 bool teachMode() {
   teachCount = 0;
   Serial.println("=== 示教开始: 摇杆控舵机, 记录键存点(共5个) ===");
-  Serial.println("    摇杆1: 左右=底座 / 前后=大臂   摇杆2: 左右=小臂 (爪子已锁定)");
+  Serial.println("    摇杆1: 左右=底座 / 前后=大臂   摇杆2: 前后=小臂 (爪子已锁定)");
 
   // 从待机位上方出发
   moveToPoint(HOME.x, HOME.y, Z_TEACH);
@@ -345,8 +349,8 @@ bool teachMode() {
   while (teachCount < 5) {
     // 1. 摇杆 -> 三个舵机角（爪子不动，保持夹笔）
     curBase = constrain(curBase + joyDeltaAngle(JOY_1X_PIN), 0, 180);
-    currarm = constrain(currarm + joyDeltaAngle(JOY_1Y_PIN), 20, 115);
-    curfarm = constrain(curfarm + joyDeltaAngle(JOY_2X_PIN), 90, 145);
+    currarm = constrain(currarm + joyDeltaAngle(JOY_1Y_PIN), 20, 120);
+    curfarm = constrain(curfarm + joyDeltaAngle(JOY_2Y_PIN), 90, 145);
     Base.write(curBase);
     rArm.write(currarm);
     fArm.write(curfarm);
@@ -491,7 +495,7 @@ void setup() {
 
   Base.write(90);
   delay(10);
-  rArm.write(20);
+  rArm.write(45);
   delay(10);
   fArm.write(90);
   delay(10);

@@ -17,17 +17,17 @@ SoftwareSerial link(10, 11); //修改记得
 
 #define JOY_1X_PIN   A0       // 摇杆1 X 轴 -> 底座
 #define JOY_1Y_PIN   A1       // 摇杆1 Y 轴 -> 大臂
-#define JOY_2X_PIN   A2       // 摇杆2 X 轴 -> 小臂
-#define JOY_2Y_PIN   A3       // 摇杆2 Y 轴 -> 爪子
+#define JOY_2X_PIN   A2       // 摇杆2 X 轴 -> 爪子
+#define JOY_2Y_PIN   A3       // 摇杆2 Y 轴 -> 小臂
 #define JOY_CENTER  513      // 摇杆中位理论值
 #define JOY_DEAD    50
 
-const float L1 = ;   //记得填写
-const float L2 = ;
-const float H0 = ;
+const float L1 =8 ;   //记得填写
+const float L2 =8 ;
+const float H0 =6 ;
 
-#define GRIP_OPEN_ANGLE   168
-#define GRIP_CLOSE_ANGLE  81
+#define GRIP_OPEN_ANGLE   81
+#define GRIP_CLOSE_ANGLE  178
 
 #define STEP_ANGLE   2
 #define STEP_DELAY   15
@@ -37,9 +37,9 @@ const float H0 = ;
 #define HOVER_DZ      50.0
 /* ==================== 全局变量 ==================== */
 
-const float Base_OFF=90,Base_DIR=1;
-const float rArm_OFF=90,rArm_DIR=1;
-const float fArm_OFF=90,fArm_DIR=1;
+const float Base_OFF=94.6,Base_DIR=1;
+const float rArm_OFF=135,rArm_DIR=-1;
+const float fArm_OFF=-50,fArm_DIR=1;
 
 Servo Base;
 Servo rArm;
@@ -61,11 +61,11 @@ int recLen = 0;           // 本次已录了多少帧
 /* ==================== 按键一（直接用任务二的） ==================== */
 
 // 记录三个关节舵机"当前"的角度（用于平滑步进时知道从哪出发）
-float curBase = 90, currarm = 20, curfarm = 90;
+float curBase = 90, currarm = 45, curfarm = 90;
 float curgrip = GRIP_OPEN_ANGLE;
 
 float baseangle=90;
-float rarmangle=20;
+float rarmangle=45;
 float farmangle=90;
 
 struct Point {
@@ -105,7 +105,7 @@ void exchangeData(float x,float y,float z,float &baseangle,float &rarmangle,floa
 
 //转变具体的角度变为指令的角度
 int baseToServo(float baseangle)     { return constrain((int)(Base_OFF  + Base_DIR *baseangle ),   0, 180); }
-int rarmToServo(float rarmangle)     { return constrain((int)(rArm_OFF  + rArm_DIR *rarmangle),  20, 115); }
+int rarmToServo(float rarmangle)     { return constrain((int)(rArm_OFF  + rArm_DIR *rarmangle),  20, 120); }
 int farmToServo(float farmangle)     { return constrain((int)(fArm_OFF  + fArm_DIR *farmangle),  90, 145); }
 
 //阻塞式平滑移动（三轴同步）
@@ -145,7 +145,7 @@ void gripMoveTo(int target) {
       curgrip -= STEP_ANGLE;              // 往小走一小步
       if (curgrip< target) curgrip = target;
     }
-    Gripper.write((int)round(constrain(curgrip, 81, 168)));
+    Gripper.write((int)round(constrain(curgrip, 81, 178)));
     delay(STEP_DELAY);
   }
 }
@@ -234,9 +234,9 @@ void recordloop()
     }
     //移动机器
     curBase  = constrain(curBase  + truemove(JOY_1X_PIN), 0, 180);
-    currarm  = constrain(currarm  + truemove(JOY_1Y_PIN), 20, 115);
-    curfarm  = constrain(curfarm  + truemove(JOY_2X_PIN), 90, 145);
-    curgrip  = constrain(curgrip  + truemove(JOY_2Y_PIN), 81, 168);
+    currarm  = constrain(currarm  + truemove(JOY_1Y_PIN), 20, 120);
+    curfarm  = constrain(curfarm  + truemove(JOY_2Y_PIN), 90, 145);
+    curgrip  = constrain(curgrip  + truemove(JOY_2X_PIN), 81, 178);
     Base.write((int)round(curBase));
     rArm.write((int)round(currarm));
     fArm.write((int)round(curfarm));
@@ -296,7 +296,7 @@ void setup() {
 
   Base.write(90);
   delay(10);
-  rArm.write(20);
+  rArm.write(45);
   delay(10);
   fArm.write(90);
   delay(10);

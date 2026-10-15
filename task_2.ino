@@ -15,16 +15,16 @@
 
 //控制机械臂的平滑移动
 #define STEP_ANGLE   2     // 每步最多转 2 度
-#define STEP_DELAY   100  
+#define STEP_DELAY   25  
 
-#define HOVER_DZ 10.0   // 悬停高度：在目标点正上方 50mm 处移动，防止横扫撞倒物体
+#define HOVER_DZ  100.0  // 悬停高度：在目标点正上方 100mm 处移动，防止横扫撞倒物体
 
 /* ==================== 全局变量 ==================== */
 
 //确定各个部分的初始角度值
-const float Base_OFF=90,Base_DIR=1;
-const float rArm_OFF=145,rArm_DIR=-1;
-const float fArm_OFF=-50,fArm_DIR=1;
+const float Base_OFF  = 4.6, Base_DIR = 1;
+const float rArm_OFF  = 135, rArm_DIR  = -1;
+const float fArm_OFF  = -50, fArm_DIR  = 1;
 
 //各个部分的角度
 float baseangle=90;
@@ -35,9 +35,10 @@ float farmangle=90;
 int curBase = 90, currarm = 45, curfarm = 90;
 
 //确定好各个臂的长度
-const float L1=8;      //大臂       记得测量实际的长度，90.0
-const float L2=8;      //小臂
-const float H0=6;      //底座
+const float L1=80.0;      //大臂       记得测量实际的长度，90.0
+const float L2=80.0;      //小臂
+const float H0=53.0;      //底座
+const float L4=63.0;
 
 Servo Base;
 Servo rArm;
@@ -51,39 +52,42 @@ struct Point {
   float z;
 };
 
-Point pickA  = {1,4.2,2}; // 物体A 在哪里
-Point placeA = {7.8, -10.7,2}; // 物体A 要放到哪里
-// Point pickB  = {150,   0, 30}; //同理 
-// Point placeB = { 90, -90, 60};
-// Point pickC  = {100,  60, 30};
-// Point placeC = { 60, -80, 60};
+Point pickB  = {-160.0,52.0,4.0}; // 物体b 硬币在哪里
+Point placeB = { 100.0 ,120.0 ,13.0}; // 物体b 要放到哪里
+Point pickA  = {-65,75, 4.0}; //同理    ###############################相反
+Point placeA = { 123.0,162.0, 30.0};
+ Point placeC  = {100,  60, 6.0};
+ Point  pickC= { -40.0, 100, 6.0};
 
-Point HOME   = {10, 0, 6};    // 任务结束后的"休息位"
+Point HOME   = {0.0,150.0,60.0};    // 任务结束后的"休息位"
 
 /* ==================== 工具函数 ==================== */
 
 //转变xyz到具体的角度
-void exchangeData(float x,float y,float z,float &baseangle,float &rarmangle,float &farmangle)
+bool exchangeData(float x,float y,float z,float &baseangle,float &rarmangle,float &farmangle)
 {
   float tmp1;
   float tmp2;
-  float r=sqrt(x*x+y*y);
+  float r=(sqrtf(x*x+y*y)-L4);
+  if (r < 0) return false;
   float H1=z-H0;
-  float L3=sqrt(H1*H1+r*r);
-  baseangle=atan2(y,x)* 180.0 / PI;
+  float L3=sqrtf(H1*H1+r*r);
+  if (L3 > L1 + L2)       return false;   
+  if (L3 < fabs(L1 - L2)) return false; 
+  baseangle=atan2f(y,x)* 180.0 / PI;
   float tmp3=(L1*L1+L2*L2-L3*L3)/(2*L1*L2);
   tmp3=constrain(tmp3,-1.0,1.0);
   float tmp4=(L3*L3+L1*L1-L2*L2)/(2*L3*L1);
   tmp4=constrain(tmp4,-1.0,1.0);
-  tmp1=acos(tmp4)* 180.0 / PI;
-  tmp2=atan2(H1,r)* 180.0 / PI;
+  tmp1=acosf(tmp4)* 180.0 / PI;
+  tmp2=atan2f(H1,r)* 180.0 / PI;
   rarmangle=(tmp1)+(tmp2);
-  farmangle=(acos(tmp3)* 180.0 / PI)+rarmangle;
+  farmangle=(acosf(tmp3)* 180.0 / PI)+rarmangle;
 }
 
 //转变具体的角度变为指令的角度
 int baseToServo(float baseangle)     { return constrain((int)(Base_OFF  + Base_DIR *baseangle ),   0, 180); }
-int rarmToServo(float rarmangle)     { return constrain((int)(rArm_OFF  + rArm_DIR *rarmangle),  20, 115); }
+int rarmToServo(float rarmangle)     { return constrain((int)(rArm_OFF  + rArm_DIR *rarmangle),  20, 120); }
 int farmToServo(float farmangle)     { return constrain((int)(fArm_OFF  + fArm_DIR *farmangle),  90, 145); }
 
 //阻塞式平滑移动（三轴同步）
@@ -124,7 +128,7 @@ void gripMoveTo(int target) {
       cur -= STEP_ANGLE;              // 往小走一小步
       if (cur < target) cur = target;
     }
-    Gripper.write(constrain(cur, 81, 168));
+    Gripper.write(constrain(cur, 81, 178));
     delay(STEP_DELAY);
   }
 }
@@ -133,7 +137,7 @@ void gripOpen()  { gripMoveTo(GRIP_OPEN_ANGLE);  delay(300); } // 张开后等�
 void gripClose() { gripMoveTo(GRIP_CLOSE_ANGLE); delay(500); } // 闭合后多等一会, 夹稳
 
 //一个过程的一小步
-void moveToPoint(float x,float y,float z)
+bool moveToPoint(float x,float y,float z)
 {
   exchangeData(x,y,z,baseangle,rarmangle,farmangle);
   moveToAngles(baseangle,  rarmangle,  farmangle);
@@ -147,6 +151,8 @@ void printStep(int n, const char* msg) {
 //进行舵机的移动(完整的过程)
 void pickAndPlace(Point pick, Point place)
 {
+  
+
   printStep(1, "悬停到夹取点上方");
   moveToPoint(pick.x, pick.y, pick.z + HOVER_DZ);
   
@@ -216,14 +222,14 @@ void loop()
         pickAndPlace(pickA, placeA);
         Serial.println("DONE: A");
         break;
-      // case 'B': case 'b':
-      //   pickAndPlace(pickB, placeB);
-      //   Serial.println("DONE: B");
-      //   break;
-      // case 'C': case 'c':
-      //   pickAndPlace(pickC, placeC);
-      //   Serial.println("DONE: C");
-      //   break;
+      case 'B': case 'b':
+        pickAndPlace(pickB, placeB);
+        Serial.println("DONE: B");
+        break;
+      case 'C': case 'c':
+        pickAndPlace(pickC, placeC);
+        Serial.println("DONE: C");
+        break;
       default:
         // 收到不认识的字符，打印帮助信息
         Serial.println("Unknown command. Send A / B / C.");
